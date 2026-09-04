@@ -260,6 +260,7 @@ When formatting prices, mention both the original and converted amounts if relev
     }
 
 
+
   
     // 3. Products list pattern
     if (lower.includes('product') || lower.includes('catalog') || lower.includes('inventory')) {
@@ -269,6 +270,7 @@ When formatting prices, mention both the original and converted amounts if relev
         const result = await aggregator.executeTool(tool.name, {}, user, 'chat_agent');
         executedTools.push({
           tool: tool.name,
+          
           arguments: {},
           result,
           durationMs: Date.now() - startTime,
