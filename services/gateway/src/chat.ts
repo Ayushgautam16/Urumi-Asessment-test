@@ -245,7 +245,7 @@ When formatting prices, mention both the original and converted amounts if relev
           };
         }
 
-        
+
 
 
 
@@ -256,6 +256,7 @@ When formatting prices, mention both the original and converted amounts if relev
           toolCalls: executedTools,
         };
       }
+      
     }
 
     // 3. Products list pattern
