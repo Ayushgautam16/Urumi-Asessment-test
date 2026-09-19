@@ -256,9 +256,11 @@ When formatting prices, mention both the original and converted amounts if relev
           toolCalls: executedTools,
         };
       }
-      
+
     }
 
+
+  
     // 3. Products list pattern
     if (lower.includes('product') || lower.includes('catalog') || lower.includes('inventory')) {
       const tool = tools.find((t) => t.name.includes('list_products'));
