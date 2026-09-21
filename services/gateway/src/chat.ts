@@ -248,6 +248,7 @@ When formatting prices, mention both the original and converted amounts if relev
 
         
 
+
         const summary = orders.map((o: any) => `• **Order #${o.id}** (${o.status}) - Customer: ${o.customer_name}, Total: **$${o.total}** (${o.items_count} items)`).join('\n');
         return {
           response: `Here are the orders from the WooCommerce store:\n\n${summary}`,
