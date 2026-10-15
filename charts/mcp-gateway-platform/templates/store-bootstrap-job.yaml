@@ -32,10 +32,8 @@ spec:
               done
 
               echo "Checking WordPress installation status..."
-              # Wait for core files to exist in shared volume or initialize
-              sleep 10
+              sleep 5
 
-              # Check if core is installed
               if ! wp core is-installed --path=/var/www/html 2>/dev/null; then
                 echo "Installing WordPress core..."
                 wp core install \
@@ -48,49 +46,28 @@ spec:
                   --skip-email
               fi
 
-              # Install and activate WooCommerce
               echo "Ensuring WooCommerce plugin is active..."
               wp plugin install woocommerce --activate --path=/var/www/html || true
 
-              # Enable Cash on Delivery (COD) for testing checkout without credit cards
               echo "Enabling Cash on Delivery (COD) payment gateway..."
               wp option update woocommerce_cod_settings '{"enabled":"yes","title":"Cash on delivery","description":"Pay with cash upon delivery.","instructions":"Pay with cash upon delivery.","enable_for_methods":[],"enable_for_virtual":"yes"}' --format=json --path=/var/www/html || true
 
-              # Seed demo products if empty
-              echo "Checking catalog products..."
-              COUNT=$(wp post list --post_type=product --format=count --path=/var/www/html 2>/dev/null || echo 0)
-              if [ "$COUNT" -eq "0" ]; then
-                echo "Seeding initial products for testing..."
-                wp wc product create \
-                  --name="Ergonomic Mechanical Keyboard" \
-                  --type=simple \
-                  --regular_price="149.00" \
-                  --description="High-performance mechanical keyboard with tactile switches." \
-                  --short_description="Tactile mechanical switches with RGB backlight." \
-                  --manage_stock=true \
-                  --stock_quantity=50 \
-                  --status=publish \
-                  --user=1 \
-                  --path=/var/www/html || true
-
-                wp wc product create \
-                  --name="Wireless Precision Mouse" \
-                  --type=simple \
-                  --regular_price="69.00" \
-                  --description="Ultra-lightweight wireless gaming and productivity mouse." \
-                  --manage_stock=true \
-                  --stock_quantity=35 \
-                  --status=publish \
-                  --user=1 \
-                  --path=/var/www/html || true
-              fi
-
-              # Configure REST API keys in database
-              echo "Provisioning WooCommerce REST API keys for MCP server..."
+              echo "Running WooCommerce installation and seeding products..."
               wp eval '
+                if (class_exists("WC_Install")) {
+                  WC_Install::install();
+                }
+
+                if (!function_exists("wc_api_hash")) {
+                  function wc_api_hash($key) {
+                    return hash_hmac("sha256", $key, "wc-api");
+                  }
+                }
+
                 global $wpdb;
                 $user_id = 1;
-                $key_id = $wpdb->get_var($wpdb->prepare("SELECT key_id FROM {$wpdb->prefix}woocommerce_api_keys WHERE consumer_key = %s", wc_api_hash("{{ .Values.secrets.wcConsumerKey }}")));
+                $key_hash = wc_api_hash("{{ .Values.secrets.wcConsumerKey }}");
+                $key_id = $wpdb->get_var($wpdb->prepare("SELECT key_id FROM {$wpdb->prefix}woocommerce_api_keys WHERE consumer_key = %s", $key_hash));
                 if (!$key_id) {
                   $wpdb->insert(
                     "{$wpdb->prefix}woocommerce_api_keys",
@@ -98,7 +75,7 @@ spec:
                       "user_id"         => $user_id,
                       "description"     => "Team MCP Gateway REST Key",
                       "permissions"     => "read_write",
-                      "consumer_key"    => wc_api_hash("{{ .Values.secrets.wcConsumerKey }}"),
+                      "consumer_key"    => $key_hash,
                       "consumer_secret" => "{{ .Values.secrets.wcConsumerSecret }}",
                       "truncated_key"   => substr("{{ .Values.secrets.wcConsumerKey }}", -7),
                       "last_access"     => null
@@ -109,7 +86,28 @@ spec:
                 } else {
                   echo "WooCommerce API key already exists.\n";
                 }
-              ' --path=/var/www/html || true
+
+                // Check if products exist
+                $prods = get_posts(array("post_type" => "product", "numberposts" => 1));
+                if (empty($prods) && class_exists("WC_Product_Simple")) {
+                  $p1 = new WC_Product_Simple();
+                  $p1->set_name("Ergonomic Mechanical Keyboard");
+                  $p1->set_regular_price("149.00");
+                  $p1->set_manage_stock(true);
+                  $p1->set_stock_quantity(50);
+                  $p1->set_status("publish");
+                  $p1->save();
+
+                  $p2 = new WC_Product_Simple();
+                  $p2->set_name("Wireless Precision Mouse");
+                  $p2->set_regular_price("69.00");
+                  $p2->set_manage_stock(true);
+                  $p2->set_stock_quantity(35);
+                  $p2->set_status("publish");
+                  $p2->save();
+                  echo "Demo products seeded successfully.\n";
+                }
+              ' --path=/var/www/html
 
               echo "Store bootstrap complete!"
           volumeMounts:
