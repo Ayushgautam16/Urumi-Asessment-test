@@ -1,0 +1,92 @@
+{{- if .Values.networkPolicies.enabled -}}
+# Deny ingress to WooCommerce MCP server from outside mcp-system, only allow gateway pod
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-gateway-to-wc-mcp
+  labels:
+    {{- include "mcp-platform.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      app: woocommerce-mcp
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: gateway
+      ports:
+        - protocol: TCP
+          port: {{ .Values.woocommerceMcp.service.port }}
+---
+# Deny ingress to Upstream Currency MCP server except from gateway
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-gateway-to-currency-mcp
+  labels:
+    {{- include "mcp-platform.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      app: upstream-currency
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: gateway
+      ports:
+        - protocol: TCP
+          port: {{ .Values.upstreamCurrency.service.port }}
+---
+# Deny ingress to Upstream Inventory MCP server except from gateway
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-gateway-to-inventory-mcp
+  labels:
+    {{- include "mcp-platform.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      app: upstream-inventory
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: gateway
+      ports:
+        - protocol: TCP
+          port: {{ .Values.upstreamInventory.service.port }}
+---
+# Allow MariaDB ingress only from WooCommerce store pod
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-store-to-mariadb
+  labels:
+    {{- include "mcp-platform.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      app: mariadb
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: woocommerce-store
+        - podSelector:
+            matchLabels:
+              app: store-bootstrap
+      ports:
+        - protocol: TCP
+          port: 3306
+{{- end }}
