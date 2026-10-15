@@ -14,10 +14,6 @@ Admins connect upstream MCP servers once in a central management dashboard; ever
 
 ## Table of Contents
 
-
-
-
-
 - [Architecture Overview](#architecture-overview)
 - [Key Features](#key-features)
 - [The 4 Layers of the System](#the-4-layers-of-the-system)
@@ -31,7 +27,6 @@ Admins connect upstream MCP servers once in a central management dashboard; ever
 - [Troubleshooting & Runbook](#troubleshooting--runbook)
 
 ---
-
 
 ## Architecture Overview
 
