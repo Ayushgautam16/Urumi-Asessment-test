@@ -63,6 +63,7 @@ spec:
             - name: WORDPRESS_CONFIG_EXTRA
               value: |
                 /* Allow REST API basic auth over HTTP within internal cluster */
+                $_SERVER['HTTPS'] = 'on';
                 define('WP_ENVIRONMENT_TYPE', 'local');
                 define('WP_HOME', 'http://{{ .Values.ingress.storeHost }}');
                 define('WP_SITEURL', 'http://{{ .Values.ingress.storeHost }}');
