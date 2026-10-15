@@ -252,7 +252,7 @@ app.post('/messages', async (req: Request, res: Response) => {
     return;
   }
   try {
-    await transport.handlePostMessage(req, res);
+    await transport.handlePostMessage(req, res, req.body);
   } catch (err: any) {
     console.error(`Error in currency /messages for session ${sessionId}:`, err);
     if (!res.headersSent) {
