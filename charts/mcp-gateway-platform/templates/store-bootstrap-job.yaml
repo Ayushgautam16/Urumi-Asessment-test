@@ -17,6 +17,9 @@ spec:
       containers:
         - name: wp-cli
           image: wordpress:cli-php8.2
+          envFrom:
+            - secretRef:
+                name: store-secret
           command:
             - /bin/sh
             - -c
