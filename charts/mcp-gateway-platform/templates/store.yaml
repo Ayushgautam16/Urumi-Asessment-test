@@ -1,0 +1,105 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: store-pvc
+  labels:
+    {{- include "mcp-platform.labels" . | nindent 4 }}
+    app: woocommerce-store
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: {{ .Values.global.storageClass }}
+  resources:
+    requests:
+      storage: {{ .Values.store.persistence.size }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: woocommerce-store
+  labels:
+    {{- include "mcp-platform.labels" . | nindent 4 }}
+    app: woocommerce-store
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: woocommerce-store
+  template:
+    metadata:
+      labels:
+        app: woocommerce-store
+    spec:
+      containers:
+        - name: wordpress
+          image: "{{ .Values.store.image.repository }}:{{ .Values.store.image.tag }}"
+          imagePullPolicy: {{ .Values.store.image.pullPolicy }}
+          ports:
+            - containerPort: 80
+              name: http
+          env:
+            - name: WORDPRESS_DB_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: store-secret
+                  key: WORDPRESS_DB_HOST
+            - name: WORDPRESS_DB_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: store-secret
+                  key: WORDPRESS_DB_NAME
+            - name: WORDPRESS_DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: store-secret
+                  key: WORDPRESS_DB_USER
+            - name: WORDPRESS_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: store-secret
+                  key: WORDPRESS_DB_PASSWORD
+            - name: WORDPRESS_CONFIG_EXTRA
+              value: |
+                /* Allow REST API basic auth over HTTP within internal cluster */
+                define('WP_ENVIRONMENT_TYPE', 'local');
+                define('WP_HOME', 'http://{{ .Values.ingress.storeHost }}');
+                define('WP_SITEURL', 'http://{{ .Values.ingress.storeHost }}');
+          volumeMounts:
+            - name: store-data
+              mountPath: /var/www/html
+          resources:
+            {{- toYaml .Values.store.resources | nindent 12 }}
+          livenessProbe:
+            tcpSocket:
+              port: 80
+            initialDelaySeconds: 45
+            periodSeconds: 15
+            timeoutSeconds: 5
+          readinessProbe:
+            tcpSocket:
+              port: 80
+            initialDelaySeconds: 20
+            periodSeconds: 10
+            timeoutSeconds: 5
+      volumes:
+        - name: store-data
+          persistentVolumeClaim:
+            claimName: store-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: woocommerce-store
+  labels:
+    {{- include "mcp-platform.labels" . | nindent 4 }}
+    app: woocommerce-store
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: 80
+      name: http
+  selector:
+    app: woocommerce-store
