@@ -15,9 +15,7 @@ import {
   Check,
   Send,
   AlertTriangle,
-  Clock,
   User as UserIcon,
-  ChevronRight,
   Sparkles,
 } from 'lucide-react';
 
@@ -97,7 +95,6 @@ export default function App() {
   const [users, setUsers] = useState<User[]>([]);
   const [keys, setKeys] = useState<ApiKey[]>([]);
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
-  const [loading, setLoading] = useState(false);
 
   // Active simulated logged-in user
   const [currentUser, setCurrentUser] = useState<User>({

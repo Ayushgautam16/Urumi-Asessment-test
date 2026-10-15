@@ -213,7 +213,7 @@ app.post('/api/servers', async (req: Request, res: Response) => {
 });
 
 app.put('/api/servers/:id', async (req: Request, res: Response) => {
-  const { id } = req.params;
+  const serverId = String(req.params.id);
   const updates = req.body;
 
   if (updates.url) {
@@ -225,7 +225,7 @@ app.put('/api/servers/:id', async (req: Request, res: Response) => {
   }
 
   try {
-    const updated = db.updateServer(id, updates);
+    const updated = db.updateServer(serverId, updates);
     if (updated.enabled) {
       await aggregator.syncServer(updated);
     }
@@ -239,14 +239,14 @@ app.put('/api/servers/:id', async (req: Request, res: Response) => {
 });
 
 app.post('/api/servers/:id/toggle', async (req: Request, res: Response) => {
-  const { id } = req.params;
-  const server = db.getServerById(id);
+  const serverId = String(req.params.id);
+  const server = db.getServerById(serverId);
   if (!server) {
     res.status(404).json({ error: 'Server not found' });
     return;
   }
 
-  const updated = db.updateServer(id, {
+  const updated = db.updateServer(serverId, {
     enabled: !server.enabled,
     status: !server.enabled ? 'connected' : 'disabled',
   });
@@ -260,8 +260,8 @@ app.post('/api/servers/:id/toggle', async (req: Request, res: Response) => {
 });
 
 app.delete('/api/servers/:id', async (req: Request, res: Response) => {
-  const { id } = req.params;
-  const success = db.deleteServer(id);
+  const serverId = String(req.params.id);
+  const success = db.deleteServer(serverId);
   if (!success) {
     res.status(404).json({ error: 'Server not found' });
     return;
@@ -293,7 +293,7 @@ app.post('/api/users', (req: Request, res: Response) => {
 
 // API Keys
 app.get('/api/keys', (req: Request, res: Response) => {
-  const userId = req.query.userId as string | undefined;
+  const userId = req.query.userId ? String(req.query.userId) : undefined;
   const keys = db.getApiKeys(userId).map((k) => ({
     id: k.id,
     userId: k.userId,
@@ -330,8 +330,8 @@ app.post('/api/keys', (req: Request, res: Response) => {
 });
 
 app.delete('/api/keys/:id', (req: Request, res: Response) => {
-  const { id } = req.params;
-  const revoked = db.revokeApiKey(id);
+  const keyId = String(req.params.id);
+  const revoked = db.revokeApiKey(keyId);
   if (!revoked) {
     res.status(404).json({ error: 'Key not found or already revoked' });
     return;
@@ -343,10 +343,10 @@ app.delete('/api/keys/:id', (req: Request, res: Response) => {
 app.get('/api/audit-logs', (req: Request, res: Response) => {
   const { userId, serverName, toolName, success, limit } = req.query;
   const logs = db.getAuditLogs({
-    userId: userId as string | undefined,
-    serverName: serverName as string | undefined,
-    toolName: toolName as string | undefined,
-    success: success !== undefined ? success === 'true' : undefined,
+    userId: userId ? String(userId) : undefined,
+    serverName: serverName ? String(serverName) : undefined,
+    toolName: toolName ? String(toolName) : undefined,
+    success: success !== undefined ? String(success) === 'true' : undefined,
     limit: limit ? Number(limit) : 100,
   });
   res.json(logs);
