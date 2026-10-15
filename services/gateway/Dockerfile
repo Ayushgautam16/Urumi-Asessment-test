@@ -2,7 +2,7 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 COPY package*.json ./
-RUN npm ci
+RUN npm install
 
 COPY tsconfig.json ./
 COPY src/ ./src/
@@ -14,11 +14,10 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV DATA_DIR=/data
 
-# Create data directory with proper ownership for persistent volume
 RUN mkdir -p /data && chown -R node:node /data
 
 COPY package*.json ./
-RUN npm ci --only=production
+RUN npm install --omit=dev
 
 COPY --from=builder /app/dist ./dist
 
