@@ -30,6 +30,7 @@ Admins connect upstream MCP servers once in a central management dashboard; ever
 
 ---
 
+
 ## 🏛 Architecture Overview
 
 ```mermaid
