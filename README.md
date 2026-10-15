@@ -12,28 +12,28 @@ Admins connect upstream MCP servers once in a central management dashboard; ever
 
 ---
 
-## 📑 Table of Contents
+## Table of Contents
 
 
 
 
 
-- [Architecture Overview](#-architecture-overview)
-- [Key Features](#-key-features)
-- [The 4 Layers of the System](#-the-4-layers-of-the-system)
-- [Repository Structure](#-repository-structure)
-- [Prerequisites & Local Tooling](#-prerequisites--local-tooling)
-- [Quickstart: Local Kubernetes (Kind / k3d)](#-quickstart-local-kubernetes-kind--k3d)
-- [Production VPS Deployment (k3s)](#-production-vps-deployment-k3s)
-- [Definition of Done Walkthrough](#-definition-of-done-walkthrough)
-- [Security & Threat Model](#-security--threat-model)
-- [Tradeoffs & Architectural Decisions](#-tradeoffs--architectural-decisions)
-- [Troubleshooting & Runbook](#-troubleshooting--runbook)
+- [Architecture Overview](#architecture-overview)
+- [Key Features](#key-features)
+- [The 4 Layers of the System](#the-4-layers-of-the-system)
+- [Repository Structure](#repository-structure)
+- [Prerequisites & Local Tooling](#prerequisites--local-tooling)
+- [Quickstart: Local Kubernetes (Kind / k3d)](#quickstart-local-kubernetes-kind--k3d)
+- [Production VPS Deployment (k3s)](#production-vps-deployment-k3s)
+- [Definition of Done Walkthrough](#definition-of-done-walkthrough)
+- [Security & Threat Model](#security--threat-model)
+- [Tradeoffs & Architectural Decisions](#tradeoffs--architectural-decisions)
+- [Troubleshooting & Runbook](#troubleshooting--runbook)
 
 ---
 
 
-## 🏛 Architecture Overview
+## Architecture Overview
 
 ```mermaid
 flowchart TD
@@ -88,7 +88,7 @@ flowchart TD
 
 ---
 
-## 🌟 Key Features
+## Key Features
 
 1. **Single Entry Point for All AI Tools**: External AI assistants connect to one endpoint (`/mcp/sse` or `/mcp/stream`) with a single personal API key to discover and run tools across all connected upstreams.
 2. **Zero-Leak Upstream Credentials**: Upstream credentials (headers, bearer tokens, WooCommerce keys) are stored server-side in Kubernetes Secrets and injected by the Gateway. Neither the browser nor external MCP clients ever see them.
@@ -108,7 +108,7 @@ flowchart TD
 
 ---
 
-## 🧱 The 4 Layers of the System
+## The 4 Layers of the System
 
 ### Layer 1: WooCommerce Store
 - **Workloads**: WordPress (with WooCommerce) and MariaDB.
@@ -149,7 +149,7 @@ flowchart TD
 
 ---
 
-## 📂 Repository Structure
+## Repository Structure
 
 ```plaintext
 .
@@ -224,7 +224,7 @@ flowchart TD
 
 ---
 
-## 🛠 Prerequisites & Local Tooling
+## Prerequisites & Local Tooling
 
 To run this platform locally, ensure you have:
 - **macOS / Linux** with terminal access
@@ -240,7 +240,7 @@ colima start --cpu 4 --memory 8 --disk 40
 
 ---
 
-## 🚀 Quickstart: Local Kubernetes (Kind / k3d)
+## Quickstart: Local Kubernetes (Kind / k3d)
 
 ### Step 1: Create Cluster with Port Mappings
 Create a local Kind cluster that maps ports 80 and 443 to the host:
@@ -318,7 +318,7 @@ Access your applications:
 
 ---
 
-## 🌐 Production VPS Deployment (k3s)
+## Production VPS Deployment (k3s)
 
 Deploying to a single-node or multi-node production VPS running k3s requires only configuration updates via Helm values:
 
@@ -337,7 +337,7 @@ helm install mcp-platform ./charts/mcp-gateway-platform \
 
 ---
 
-## ✅ Definition of Done Walkthrough
+## Definition of Done Walkthrough
 
 The platform satisfies all testable criteria outlined in the hiring specification:
 
@@ -384,7 +384,7 @@ The platform satisfies all testable criteria outlined in the hiring specificatio
 
 ---
 
-## 🔒 Security & Threat Model
+## Security & Threat Model
 
 - **Hashed API Key Storage**: Personal API keys are stored hashed with SHA-256. Plaintext keys are never stored and cannot be retrieved after initial generation.
 - **Upstream Credential Isolation**: Upstream tokens (headers, basic auth) remain entirely within the Gateway backend memory and Kubernetes Secrets.
@@ -394,7 +394,7 @@ The platform satisfies all testable criteria outlined in the hiring specificatio
 
 ---
 
-## ⚖️ Tradeoffs & Architectural Decisions
+## Tradeoffs & Architectural Decisions
 
 1. **REST API vs. WP-CLI for WooCommerce**:
    - *Choice*: WooCommerce REST API v3 over HTTP.
@@ -408,7 +408,7 @@ The platform satisfies all testable criteria outlined in the hiring specificatio
 
 ---
 
-## 📜 Documentation Links
+## Documentation Links
 
 - [System Design & Tradeoffs (docs/system-design.md)](./docs/system-design.md)
 - [Security & Threat Model (docs/threat-model.md)](./docs/threat-model.md)
@@ -416,5 +416,5 @@ The platform satisfies all testable criteria outlined in the hiring specificatio
 
 ---
 
-## 📄 License
+## License
 This project is licensed under the Apache 2.0 License.
