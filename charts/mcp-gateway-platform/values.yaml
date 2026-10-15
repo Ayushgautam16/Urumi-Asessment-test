@@ -1,0 +1,136 @@
+global:
+  storageClass: "standard"
+  namespace: "mcp-system"
+
+secrets:
+  mysqlRootPassword: "root_secure_pw_9381"
+  mysqlDatabase: "woocommerce"
+  mysqlUser: "wc_user"
+  mysqlPassword: "wc_db_password_7194"
+  wpAdminUser: "admin"
+  wpAdminPassword: "admin_password_123"
+  wpAdminEmail: "admin@woocommerce.local"
+  wcConsumerKey: "ck_urumi_mcp_test_key_8492"
+  wcConsumerSecret: "cs_urumi_mcp_test_secret_9182"
+  geminiApiKey: "AQ.Ab8RN6IH2GHzeu6OeTu6-CefCzhl97UR86Svsmbb4sIwV9hpFA"
+  geminiModel: "gemini-2.0-flash"
+
+mariadb:
+  image:
+    repository: mariadb
+    tag: "10.11"
+    pullPolicy: IfNotPresent
+  persistence:
+    enabled: true
+    size: 2Gi
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+store:
+  image:
+    repository: wordpress
+    tag: "php8.2-apache"
+    pullPolicy: IfNotPresent
+  persistence:
+    enabled: true
+    size: 3Gi
+  resources:
+    requests:
+      cpu: 200m
+      memory: 256Mi
+    limits:
+      cpu: 800m
+      memory: 768Mi
+
+woocommerceMcp:
+  image:
+    repository: mcp-platform/woocommerce-mcp
+    tag: latest
+    pullPolicy: IfNotPresent
+  service:
+    port: 8000
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      cpu: 300m
+      memory: 256Mi
+
+upstreamCurrency:
+  image:
+    repository: mcp-platform/upstream-currency
+    tag: latest
+    pullPolicy: IfNotPresent
+  service:
+    port: 8001
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      cpu: 250m
+      memory: 256Mi
+
+upstreamInventory:
+  image:
+    repository: mcp-platform/upstream-inventory
+    tag: latest
+    pullPolicy: IfNotPresent
+  service:
+    port: 8002
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      cpu: 250m
+      memory: 256Mi
+
+gateway:
+  image:
+    repository: mcp-platform/gateway
+    tag: latest
+    pullPolicy: IfNotPresent
+  service:
+    port: 4000
+  persistence:
+    enabled: true
+    size: 1Gi
+  resources:
+    requests:
+      cpu: 100m
+      memory: 192Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+dashboard:
+  image:
+    repository: mcp-platform/dashboard
+    tag: latest
+    pullPolicy: IfNotPresent
+  service:
+    port: 3000
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 200m
+      memory: 128Mi
+
+ingress:
+  enabled: true
+  className: "nginx"
+  dashboardHost: "dashboard.local.test"
+  storeHost: "woo.local.test"
+  tls: []
+
+networkPolicies:
+  enabled: true

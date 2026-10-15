@@ -1,0 +1,52 @@
+# Production VPS Configuration (k3s / Cloud Kubernetes)
+global:
+  storageClass: "local-path" # standard on k3s or change to cloud CSI (e.g. do-block-storage)
+  namespace: "mcp-system"
+
+ingress:
+  enabled: true
+  className: "nginx" # or traefik on k3s
+  dashboardHost: "gateway.yourdomain.com"
+  storeHost: "store.yourdomain.com"
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    kubernetes.io/tls-acme: "true"
+  tls:
+    - secretName: mcp-platform-tls
+      hosts:
+        - "gateway.yourdomain.com"
+        - "store.yourdomain.com"
+
+# In production, images are pulled from a container registry (GHCR / Docker Hub)
+woocommerceMcp:
+  image:
+    repository: ghcr.io/your-org/woocommerce-mcp
+    tag: v1.0.0
+    pullPolicy: IfNotPresent
+
+upstreamCurrency:
+  image:
+    repository: ghcr.io/your-org/upstream-currency
+    tag: v1.0.0
+    pullPolicy: IfNotPresent
+
+upstreamInventory:
+  image:
+    repository: ghcr.io/your-org/upstream-inventory
+    tag: v1.0.0
+    pullPolicy: IfNotPresent
+
+gateway:
+  image:
+    repository: ghcr.io/your-org/gateway
+    tag: v1.0.0
+    pullPolicy: IfNotPresent
+
+dashboard:
+  image:
+    repository: ghcr.io/your-org/dashboard
+    tag: v1.0.0
+    pullPolicy: IfNotPresent
+
+networkPolicies:
+  enabled: true

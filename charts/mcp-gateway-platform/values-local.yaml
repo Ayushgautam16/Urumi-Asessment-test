@@ -1,0 +1,44 @@
+# Local Environment Configuration (Kind / k3d / Minikube)
+global:
+  storageClass: "standard"
+  namespace: "mcp-system"
+
+ingress:
+  enabled: true
+  className: "nginx"
+  dashboardHost: "dashboard.local.test"
+  storeHost: "woo.local.test"
+  tls: []
+
+woocommerceMcp:
+  image:
+    repository: mcp-platform/woocommerce-mcp
+    tag: latest
+    pullPolicy: Never
+
+upstreamCurrency:
+  image:
+    repository: mcp-platform/upstream-currency
+    tag: latest
+    pullPolicy: Never
+
+upstreamInventory:
+  image:
+    repository: mcp-platform/upstream-inventory
+    tag: latest
+    pullPolicy: Never
+
+gateway:
+  image:
+    repository: mcp-platform/gateway
+    tag: latest
+    pullPolicy: Never
+
+dashboard:
+  image:
+    repository: mcp-platform/dashboard
+    tag: latest
+    pullPolicy: Never
+
+networkPolicies:
+  enabled: false # disabled locally for easy direct port-forwarding and debugging if needed
