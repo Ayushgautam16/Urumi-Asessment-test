@@ -21,7 +21,7 @@ export class ChatAgent {
 
   constructor() {
     this.apiKey = process.env.GEMINI_API_KEY || '';
-    this.model = process.env.GEMINI_MODEL || 'gemini-2.0-flash';
+    this.model = process.env.GEMINI_MODEL || 'gemini-3.8-flash';
   }
 
   async runConversation(

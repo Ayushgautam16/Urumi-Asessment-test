@@ -13,7 +13,7 @@ secrets:
   wcConsumerKey: "ck_urumi_mcp_test_key_8492"
   wcConsumerSecret: "cs_urumi_mcp_test_secret_9182"
   geminiApiKey: "AQ.Ab8RN6IH2GHzeu6OeTu6-CefCzhl97UR86Svsmbb4sIwV9hpFA"
-  geminiModel: "gemini-2.0-flash"
+  geminiModel: "gemini-3.8-flash"
 
 mariadb:
   image:
