@@ -141,7 +141,7 @@ app.post('/mcp/messages', async (req: Request, res: Response) => {
   }
 
   try {
-    await session.transport.handlePostMessage(req, res);
+    await session.transport.handlePostMessage(req, res, req.body);
   } catch (err: any) {
     console.error(`Error in /mcp/messages for session ${sessionId}:`, err);
     if (!res.headersSent) {
