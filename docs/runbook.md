@@ -5,7 +5,7 @@ This runbook guides you through testing the entire platform end-to-end with **tw
 
 ---
 
-## 📋 Pre-Flight Checklist
+##  Pre-Flight Checklist
 
 Ensure the platform is deployed and pods are running:
 ```bash
@@ -20,7 +20,7 @@ Ensure `/etc/hosts` contains:
 
 ---
 
-## 🛒 Flow 1: Store Checkout Test
+##  Flow 1: Store Checkout Test
 
 1. **Open Storefront**:
    Navigate to `http://woo.local.test` in your web browser.
@@ -38,7 +38,7 @@ Ensure `/etc/hosts` contains:
 
 ---
 
-## 🤖 Flow 2: Chat Agent with User A (Admin)
+##  Flow 2: Chat Agent with User A (Admin)
 
 1. **Open Dashboard**:
    Open `http://dashboard.local.test` in your browser.
@@ -62,7 +62,7 @@ Ensure `/etc/hosts` contains:
 
 ---
 
-## 🔌 Flow 3: External MCP Client with User B (Team Member)
+##  Flow 3: External MCP Client with User B (Team Member)
 
 1. **Switch to User B & Generate API Key**:
    - In the Dashboard, switch user context or log in as **User B (Member)**.
@@ -103,7 +103,7 @@ Ensure `/etc/hosts` contains:
 
 ---
 
-## 🛡 Flow 4: Team and Control Verification
+##  Flow 4: Team and Control Verification
 
 ### 4.1 Key Revocation
 1. In the Dashboard (as Admin or User B), locate User B's active key and click **Revoke Key**.
