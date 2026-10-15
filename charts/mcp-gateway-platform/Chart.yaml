@@ -1,0 +1,14 @@
+apiVersion: v2
+name: mcp-gateway-platform
+description: Cloud-native WooCommerce hosting platform with Team MCP Gateway on Kubernetes
+type: application
+version: 1.0.0
+appVersion: "1.0.0"
+keywords:
+  - woocommerce
+  - mcp
+  - model-context-protocol
+  - ai-gateway
+  - kubernetes
+maintainers:
+  - name: Urumi AI Candidate
