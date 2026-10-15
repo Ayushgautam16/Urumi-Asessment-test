@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: upstream-currency
+  labels:
+    {{- include "mcp-platform.labels" . | nindent 4 }}
+    app: upstream-currency
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: upstream-currency
+  template:
+    metadata:
+      labels:
+        app: upstream-currency
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+      containers:
+        - name: currency-mcp
+          image: "{{ .Values.upstreamCurrency.image.repository }}:{{ .Values.upstreamCurrency.image.tag }}"
+          imagePullPolicy: {{ .Values.upstreamCurrency.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.upstreamCurrency.service.port }}
+              name: http
+          env:
+            - name: PORT
+              value: "{{ .Values.upstreamCurrency.service.port }}"
+          resources:
+            {{- toYaml .Values.upstreamCurrency.resources | nindent 12 }}
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: {{ .Values.upstreamCurrency.service.port }}
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: {{ .Values.upstreamCurrency.service.port }}
+            initialDelaySeconds: 5
+            periodSeconds: 5
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: upstream-currency
+  labels:
+    {{- include "mcp-platform.labels" . | nindent 4 }}
+    app: upstream-currency
+spec:
+  type: ClusterIP
+  ports:
+    - port: {{ .Values.upstreamCurrency.service.port }}
+      targetPort: {{ .Values.upstreamCurrency.service.port }}
+      name: http
+  selector:
+    app: upstream-currency
