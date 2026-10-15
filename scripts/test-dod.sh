@@ -4,6 +4,10 @@ set -euo pipefail
 GATEWAY_URL="http://dashboard.local.test"
 STORE_URL="http://woo.local.test"
 
+curl_cmd() {
+  curl -s --resolve "woo.local.test:80:127.0.0.1" --resolve "dashboard.local.test:80:127.0.0.1" "$@"
+}
+
 echo "============================================================"
 echo " Running Automated Definition of Done (DoD) Test Suite      "
 echo "============================================================"
@@ -17,7 +21,7 @@ info() { echo -e "\033[0;34m[INFO]\033[0m $1"; }
 # 1. Store Test
 # ------------------------------------------------------------
 info "1. Verifying WooCommerce Store is accessible..."
-STORE_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "${STORE_URL}" || echo "000")
+STORE_STATUS=$(curl_cmd -o /dev/null -w "%{http_code}" "${STORE_URL}" || echo "000")
 if [ "$STORE_STATUS" -eq "200" ] || [ "$STORE_STATUS" -eq "301" ] || [ "$STORE_STATUS" -eq "302" ]; then
   pass "Storefront is live at ${STORE_URL} (HTTP ${STORE_STATUS})"
 else
