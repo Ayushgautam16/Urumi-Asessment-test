@@ -32,7 +32,7 @@ fi
 # 2. Chat Agent Test (User A - Admin)
 # ------------------------------------------------------------
 info "2. Testing AI Chat Agent as User A (Admin) to create a product..."
-CREATE_PROD_RES=$(curl -s -X POST "${GATEWAY_URL}/api/chat" \
+CREATE_PROD_RES=$(curl_cmd -X POST "${GATEWAY_URL}/api/chat" \
   -H "Content-Type: application/json" \
   -d '{
     "userId": "usr-admin-a",
@@ -46,7 +46,7 @@ else
 fi
 
 info "Querying orders via Chat Agent as User A..."
-ORDERS_RES=$(curl -s -X POST "${GATEWAY_URL}/api/chat" \
+ORDERS_RES=$(curl_cmd -X POST "${GATEWAY_URL}/api/chat" \
   -H "Content-Type: application/json" \
   -d '{
     "userId": "usr-admin-a",
@@ -58,7 +58,7 @@ pass "Chat Agent orders query returned successfully"
 # 3. External MCP Client Test (User B - Member)
 # ------------------------------------------------------------
 info "3. Generating API Key for User B (Member)..."
-KEY_RES=$(curl -s -X POST "${GATEWAY_URL}/api/keys" \
+KEY_RES=$(curl_cmd -X POST "${GATEWAY_URL}/api/keys" \
   -H "Content-Type: application/json" \
   -d '{"userId": "usr-member-b", "name": "Cursor External Client Key"}')
 
@@ -72,7 +72,7 @@ else
 fi
 
 info "Testing External Client Tools Aggregation (/api/tools)..."
-TOOLS_COUNT=$(curl -s "${GATEWAY_URL}/api/tools" | grep -o '"name":' | wc -l)
+TOOLS_COUNT=$(curl_cmd "${GATEWAY_URL}/api/tools" | grep -o '"name":' | wc -l)
 if [ "${TOOLS_COUNT}" -ge 8 ]; then
   pass "Aggregated ${TOOLS_COUNT} tools across all upstream servers"
 else
@@ -83,11 +83,11 @@ fi
 # 4. Team & Control: Key Revocation & Disablement
 # ------------------------------------------------------------
 info "4. Testing API Key Revocation for User B..."
-REVOKE_RES=$(curl -s -X DELETE "${GATEWAY_URL}/api/keys/${KEY_ID}")
+REVOKE_RES=$(curl_cmd -X DELETE "${GATEWAY_URL}/api/keys/${KEY_ID}")
 pass "API Key revoked"
 
 info "Verifying that revoked key is rejected with 401 Unauthorized..."
-UNAUTH_RES=$(curl -s -o /dev/null -w "%{http_code}" "${GATEWAY_URL}/mcp/sse?apiKey=${USER_B_KEY}")
+UNAUTH_RES=$(curl_cmd -o /dev/null -w "%{http_code}" "${GATEWAY_URL}/mcp/sse?apiKey=${USER_B_KEY}")
 if [ "${UNAUTH_RES}" -eq "401" ]; then
   pass "Revoked key was immediately rejected with HTTP 401 Unauthorized"
 else
@@ -98,7 +98,7 @@ fi
 # 5. Audit Log Attribution
 # ------------------------------------------------------------
 info "5. Verifying Audit Log attribution..."
-AUDIT_LOGS=$(curl -s "${GATEWAY_URL}/api/audit-logs?limit=5")
+AUDIT_LOGS=$(curl_cmd "${GATEWAY_URL}/api/audit-logs?limit=5")
 if echo "${AUDIT_LOGS}" | grep -q "usr-admin-a"; then
   pass "Audit log accurately attributed calls to User A (Admin)"
 else
