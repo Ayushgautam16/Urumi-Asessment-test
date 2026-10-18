@@ -244,6 +244,7 @@ When formatting prices, mention both the original and converted amounts if relev
             toolCalls: executedTools,
           };
         }
+        
 
         const summary = orders.map((o: any) => `• **Order #${o.id}** (${o.status}) - Customer: ${o.customer_name}, Total: **$${o.total}** (${o.items_count} items)`).join('\n');
         return {
