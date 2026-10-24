@@ -1,37 +1,34 @@
 :root {
-  /* True Deep Carbon Palette - Zero Generic Blue */
-  --bg-pitch: #060709;
-  --bg-deep: #0a0c10;
-  --bg-surface: #10131a;
-  --bg-surface-elevated: #161a24;
-  --bg-surface-hover: #1c212e;
+  /* Carbon & Obsidian Theme Variables */
+  --bg-pitch: #06070a;
+  --bg-sidebar: #090b0f;
+  --bg-topbar: #0d1017;
+  --bg-surface: #10131b;
+  --bg-surface-elevated: #151924;
+  --bg-surface-hover: #1c2230;
   
-  --border-subtle: rgba(255, 255, 255, 0.07);
-  --border-medium: rgba(255, 255, 255, 0.12);
-  --border-active: rgba(16, 243, 165, 0.5);
+  --border-subtle: rgba(255, 255, 255, 0.06);
+  --border-medium: rgba(255, 255, 255, 0.11);
+  --border-strong: rgba(255, 255, 255, 0.18);
   --border-brand: rgba(16, 243, 165, 0.35);
 
-  /* Bespoke Brand Accent: Electric Mint & Emerald */
+  /* Primary Brand Accent: Electric Mint & Emerald */
   --brand-primary: #10f3a5;
   --brand-light: #5efcc0;
   --brand-dark: #059669;
-  --brand-muted: rgba(16, 243, 165, 0.12);
-  --brand-glow: rgba(16, 243, 165, 0.25);
+  --brand-muted: rgba(16, 243, 165, 0.1);
+  --brand-glow: rgba(16, 243, 165, 0.22);
   --brand-gradient: linear-gradient(135deg, #10f3a5 0%, #059669 100%);
   --brand-gradient-hover: linear-gradient(135deg, #2dfbb4 0%, #10b981 100%);
 
-  /* Secondary Accents */
+  /* Functional Accents */
   --accent-amber: #f59e0b;
-  --accent-amber-bg: rgba(245, 158, 11, 0.12);
-  --accent-amber-border: rgba(245, 158, 11, 0.3);
+  --accent-amber-bg: rgba(245, 158, 11, 0.1);
+  --accent-amber-border: rgba(245, 158, 11, 0.25);
 
   --accent-rose: #f43f5e;
-  --accent-rose-bg: rgba(244, 63, 94, 0.12);
-  --accent-rose-border: rgba(244, 63, 94, 0.3);
-
-  --success: #10f3a5;
-  --success-bg: rgba(16, 243, 165, 0.12);
-  --success-border: rgba(16, 243, 165, 0.3);
+  --accent-rose-bg: rgba(244, 63, 94, 0.1);
+  --accent-rose-border: rgba(244, 63, 94, 0.25);
 
   --text-pure: #ffffff;
   --text-main: #f1f5f9;
@@ -42,16 +39,15 @@
   --font-main: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
 
-  --radius-xs: 6px;
+  --radius-xs: 5px;
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 16px;
   --radius-full: 9999px;
 
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.4);
-  --shadow-md: 0 8px 24px -4px rgba(0, 0, 0, 0.6), 0 0 1px 1px rgba(255, 255, 255, 0.06);
-  --shadow-lg: 0 16px 36px -8px rgba(0, 0, 0, 0.75), 0 0 1px 1px rgba(255, 255, 255, 0.08);
-  --shadow-brand: 0 0 24px -4px rgba(16, 243, 165, 0.35);
+  --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 8px 24px -4px rgba(0, 0, 0, 0.6), 0 0 1px 1px rgba(255, 255, 255, 0.05);
+  --shadow-lg: 0 18px 40px -8px rgba(0, 0, 0, 0.8), 0 0 1px 1px rgba(255, 255, 255, 0.08);
 }
 
 * {
@@ -69,11 +65,10 @@ body {
   min-height: 100vh;
   overflow-x: hidden;
   background-image:
-    radial-gradient(ellipse 65% 35% at 50% 0%, rgba(16, 243, 165, 0.08), transparent),
-    radial-gradient(circle at 90% 80%, rgba(245, 158, 11, 0.04) 0%, transparent 40%),
-    linear-gradient(to right, rgba(255, 255, 255, 0.018) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.018) 1px, transparent 1px);
-  background-size: 100% 100%, 100% 100%, 28px 28px, 28px 28px;
+    radial-gradient(ellipse 65% 35% at 50% 0%, rgba(16, 243, 165, 0.06), transparent),
+    linear-gradient(to right, rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+  background-size: 100% 100%, 28px 28px, 28px 28px;
   background-attachment: fixed;
 }
 
@@ -86,11 +81,11 @@ body {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.12);
   border-radius: var(--radius-full);
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(16, 243, 165, 0.4);
+  background: rgba(16, 243, 165, 0.35);
 }
 
 /* Glass Panels */
@@ -99,11 +94,10 @@ body {
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-md);
-  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .interactive-card {
-  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .interactive-card:hover {
   transform: translateY(-2px);
@@ -111,13 +105,42 @@ body {
   box-shadow: var(--shadow-lg), 0 0 20px -6px rgba(16, 243, 165, 0.2);
 }
 
+/* Sidebar Navigation Items */
+.sidebar-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 9px 14px;
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  border: 1px solid transparent;
+  background: transparent;
+  width: 100%;
+  transition: all 0.15s ease;
+  outline: none;
+}
+.sidebar-link:hover {
+  color: var(--text-pure);
+  background: rgba(255, 255, 255, 0.04);
+}
+.sidebar-link.active {
+  color: #031e15;
+  background: var(--brand-gradient);
+  font-weight: 700;
+  box-shadow: 0 2px 10px rgba(16, 243, 165, 0.3);
+}
+
 /* High-Contrast Buttons */
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  padding: 8px 15px;
+  gap: 7px;
+  padding: 8px 14px;
   font-family: var(--font-main);
   font-size: 13px;
   font-weight: 600;
@@ -138,7 +161,7 @@ body {
 }
 .btn-primary:hover:not(:disabled) {
   background: var(--brand-gradient-hover);
-  box-shadow: 0 4px 20px rgba(16, 243, 165, 0.55);
+  box-shadow: 0 4px 18px rgba(16, 243, 165, 0.5);
   transform: translateY(-1px);
   color: #02160f;
 }
@@ -154,7 +177,7 @@ body {
 }
 .btn-secondary:hover {
   background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.22);
   color: #fff;
 }
 
@@ -174,8 +197,8 @@ body {
   border-color: var(--accent-rose-border);
 }
 .btn-danger:hover {
-  background: rgba(244, 63, 94, 0.22);
-  border-color: rgba(244, 63, 94, 0.5);
+  background: rgba(244, 63, 94, 0.2);
+  border-color: rgba(244, 63, 94, 0.45);
   color: #fff;
 }
 
@@ -193,9 +216,9 @@ body {
 }
 
 .badge-connected {
-  background: var(--success-bg);
+  background: var(--brand-muted);
   color: #10f3a5;
-  border: 1px solid var(--success-border);
+  border: 1px solid var(--border-brand);
 }
 
 .badge-unreachable {
@@ -260,7 +283,7 @@ body {
   border-radius: var(--radius-lg);
   box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.9), 0 0 1px 1px rgba(255, 255, 255, 0.1);
   width: 100%;
-  max-width: 560px;
+  max-width: 580px;
   overflow: hidden;
   animation: modalEnter 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
