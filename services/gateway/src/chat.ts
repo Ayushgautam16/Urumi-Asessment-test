@@ -229,34 +229,46 @@ When formatting prices, mention both the original and converted amounts if relev
       const tool = tools.find((t) => t.name.includes('list_orders'));
       if (tool) {
         const startTime = Date.now();
-        const result = await aggregator.executeTool(tool.name, { per_page: 10 }, user, 'chat_agent');
-        executedTools.push({
-          tool: tool.name,
-          arguments: { per_page: 10 },
-          result,
-          durationMs: Date.now() - startTime,
-        });
+        try {
+          const result = await aggregator.executeTool(tool.name, { per_page: 10 }, user, 'chat_agent');
+          executedTools.push({
+            tool: tool.name,
+            arguments: { per_page: 10 },
+            result,
+            durationMs: Date.now() - startTime,
+          });
 
-        const orders = JSON.parse(result.content[0].text);
-        if (orders.length === 0) {
+          const orders = JSON.parse(result.content[0].text);
+          if (orders.length === 0) {
+            return {
+              response: `I checked the WooCommerce store and found no orders placed today yet.`,
+              toolCalls: executedTools,
+            };
+          }
+
+          const summary = orders.map((o: any) => `• **Order #${o.id}** (${o.status}) - Customer: ${o.customer_name}, Total: **$${o.total}** (${o.items_count} items)`).join('\n');
+          const prefix = (lower.includes('how many') || lower.includes('count'))
+            ? `There are currently **${orders.length}** order(s) in the store:\n\n`
+            : `Here are the orders from the WooCommerce store:\n\n`;
+
           return {
-            response: `I checked the WooCommerce store and found no orders placed today yet.`,
+            response: `${prefix}${summary}`,
+            toolCalls: executedTools,
+          };
+        } catch (err: any) {
+          executedTools.push({
+            tool: tool.name,
+            arguments: { per_page: 10 },
+            result: null,
+            error: err.message,
+            durationMs: Date.now() - startTime,
+          });
+          return {
+            response: `⚠️ Failed to fetch orders: ${err.message}. Please try again in a moment.`,
             toolCalls: executedTools,
           };
         }
-
-
-
-
-
-
-        const summary = orders.map((o: any) => `• **Order #${o.id}** (${o.status}) - Customer: ${o.customer_name}, Total: **$${o.total}** (${o.items_count} items)`).join('\n');
-        return {
-          response: `Here are the orders from the WooCommerce store:\n\n${summary}`,
-          toolCalls: executedTools,
-        };
       }
-
     }
 
 
