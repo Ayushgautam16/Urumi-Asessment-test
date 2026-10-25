@@ -12,8 +12,109 @@ Admins connect upstream MCP servers once in a central management dashboard; ever
 
 ---
 
+## ⚡ Quick Run Commands
+
+### 1. Automated Setup via Scripts (Recommended)
+
+Run the following commands in order from the repository root:
+
+```bash
+# Step 1: Add local domain mappings to /etc/hosts (one-time setup)
+echo "127.0.0.1 woo.local.test dashboard.local.test" | sudo tee -a /etc/hosts
+
+# Step 2: Create local Kind cluster with port mappings (80/443) & NGINX Ingress
+./scripts/setup-local-cluster.sh
+
+# Step 3: Build all microservice container images & load into Kind
+./scripts/build-images.sh
+
+# Step 4: Deploy the complete platform with Helm
+./scripts/deploy-local.sh
+
+# Step 5: (Optional) Run the automated Definition of Done (DoD) test suite
+./scripts/test-dod.sh
+```
+
+---
+
+### 2. Manual Step-by-Step Kubernetes Commands
+
+If you prefer executing each step manually:
+
+```bash
+# 1. Create Kind cluster with Ingress port mappings
+kind create cluster --name mcp-platform --config ./scripts/kind-config.yaml
+
+# 2. Install NGINX Ingress Controller
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml
+kubectl wait --namespace ingress-nginx \
+  --for=condition=ready pod \
+  --selector=app.kubernetes.io/component=controller \
+  --timeout=180s
+
+# 3. Build Docker images for all services
+docker build -t mcp-platform/gateway:latest ./services/gateway
+docker build -t mcp-platform/dashboard:latest ./services/dashboard
+docker build -t mcp-platform/woocommerce-mcp:latest ./services/woocommerce-mcp
+docker build -t mcp-platform/upstream-currency:latest ./services/upstream-currency-mcp
+docker build -t mcp-platform/upstream-inventory:latest ./services/upstream-inventory-mcp
+
+# 4. Load Docker images into Kind
+kind load docker-image mcp-platform/gateway:latest --name mcp-platform
+kind load docker-image mcp-platform/dashboard:latest --name mcp-platform
+kind load docker-image mcp-platform/woocommerce-mcp:latest --name mcp-platform
+kind load docker-image mcp-platform/upstream-currency:latest --name mcp-platform
+kind load docker-image mcp-platform/upstream-inventory:latest --name mcp-platform
+
+# 5. Deploy with Helm
+helm upgrade --install mcp-platform ./charts/mcp-gateway-platform \
+  -f ./charts/mcp-gateway-platform/values-local.yaml \
+  --create-namespace \
+  --namespace mcp-system
+
+# 6. Check running pods status
+kubectl get pods -n mcp-system -w
+```
+
+---
+
+### 3. Standalone Node.js Development (Without Kubernetes)
+
+For local development and testing individual microservices:
+
+```bash
+# Dashboard UI (Vite + React) -> http://localhost:5173
+cd services/dashboard && npm install && npm run dev
+
+# Gateway Backend -> http://localhost:4000
+cd services/gateway && npm install && npm run dev
+
+# WooCommerce MCP Server -> http://localhost:4001
+cd services/woocommerce-mcp && npm install && npm run dev
+
+# Forex Currency MCP Server -> http://localhost:4002
+cd services/upstream-currency-mcp && npm install && npm run dev
+
+# Inventory & Shipping MCP Server -> http://localhost:4003
+cd services/upstream-inventory-mcp && npm install && npm run dev
+```
+
+---
+
+### 🌐 Access URLs & Default Credentials
+
+| Component | URL | Notes / Credentials |
+| :--- | :--- | :--- |
+| **Team Management Dashboard & Chat Agent** | [http://dashboard.local.test](http://dashboard.local.test) | Switch between **User A (Admin)** & **User B (Member)** |
+| **WooCommerce Storefront** | [http://woo.local.test](http://woo.local.test) | Browse products & checkout with COD |
+| **WordPress Admin** | [http://woo.local.test/wp-admin](http://woo.local.test/wp-admin) | `admin` / `admin_password_123` |
+| **Authenticated Gateway MCP SSE** | `http://dashboard.local.test/mcp/sse` | Connect external AI tools (Claude Code, Cursor, MCP Inspector) with Bearer token |
+
+---
+
 ## Table of Contents
 
+- [Quick Run Commands](#-quick-run-commands)
 - [Architecture Overview](#architecture-overview)
 - [Key Features](#key-features)
 - [The 4 Layers of the System](#the-4-layers-of-the-system)
