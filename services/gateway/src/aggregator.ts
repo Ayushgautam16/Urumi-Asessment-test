@@ -39,11 +39,11 @@ export class McpAggregator {
 
   async syncServer(server: UpstreamServer) {
     try {
-      // Connect with 5-second timeout
+      // Connect with 10-second timeout
       const client = await this.getOrConnectClient(server);
       const listPromise = client.listTools();
       const timeoutPromise = new Promise<never>((_, reject) =>
-        setTimeout(() => reject(new Error('Timeout listing tools (5s limit exceeded)')), 5000)
+        setTimeout(() => reject(new Error('Timeout listing tools (10s limit exceeded)')), 10000)
       );
 
       const result: any = await Promise.race([listPromise, timeoutPromise]);
@@ -124,7 +124,7 @@ export class McpAggregator {
 
     const connectPromise = client.connect(transport);
     const timeoutPromise = new Promise<never>((_, reject) =>
-      setTimeout(() => reject(new Error('Connection timeout to upstream (5s exceeded)')), 5000)
+      setTimeout(() => reject(new Error('Connection timeout to upstream (10s exceeded)')), 10000)
     );
 
     await Promise.race([connectPromise, timeoutPromise]);
@@ -200,14 +200,14 @@ export class McpAggregator {
     try {
       const client = await this.getOrConnectClient(server);
 
-      // Execute tool with 5-second timeout
+      // Execute tool with 10-second timeout
       const callPromise = client.callTool({
         name: route.originalToolName,
         arguments: args,
       });
 
       const timeoutPromise = new Promise<never>((_, reject) =>
-        setTimeout(() => reject(new Error(`Tool execution timed out after 5000ms on upstream '${server.name}'`)), 5000)
+        setTimeout(() => reject(new Error(`Tool execution timed out after 10000ms on upstream '${server.name}'`)), 10000)
       );
 
       const result = await Promise.race([callPromise, timeoutPromise]);
