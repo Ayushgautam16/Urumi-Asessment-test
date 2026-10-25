@@ -335,7 +335,7 @@ export default function App() {
       const assistantMsg: ChatMessage = {
         id: String(Date.now() + 1),
         role: 'assistant',
-        content: data.response || 'No response from agent.',
+        content: data.response || (data.error ? `⚠️ ${data.error}` : 'No response from agent.'),
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         toolCalls: data.toolCalls,
       };
