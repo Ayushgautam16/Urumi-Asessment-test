@@ -32,6 +32,11 @@ spec:
       labels:
         app: woocommerce-store
     spec:
+      hostAliases:
+        - ip: "127.0.0.1"
+          hostnames:
+            - "woo.local.test"
+            - {{ .Values.ingress.storeHost | quote }}
       containers:
         - name: wordpress
           image: "{{ .Values.store.image.repository }}:{{ .Values.store.image.tag }}"
@@ -67,6 +72,8 @@ spec:
                 define('WP_ENVIRONMENT_TYPE', 'local');
                 define('WP_HOME', 'http://{{ .Values.ingress.storeHost }}');
                 define('WP_SITEURL', 'http://{{ .Values.ingress.storeHost }}');
+                define('DISABLE_WP_CRON', true);
+                define('WP_HTTP_BLOCK_EXTERNAL', false);
           volumeMounts:
             - name: store-data
               mountPath: /var/www/html
