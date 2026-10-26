@@ -134,50 +134,50 @@ cd services/upstream-inventory-mcp && npm install && npm run dev
 ```mermaid
 flowchart TD
     subgraph Clients["Clients & Users"]
-        UserA["Admin (User A)\n[Browser Dashboard]"]
-        UserB["Team Member (User B)\n[Browser Dashboard]"]
-        ExtClient["External MCP Client\n[Claude Code / Cursor / Inspector]\n(Uses User B API Key)"]
+        UserA["Admin (User A)<br/>[Browser Dashboard]"]
+        UserB["Team Member (User B)<br/>[Browser Dashboard]"]
+        ExtClient["External MCP Client<br/>[Claude Code / Cursor / Inspector]<br/>(Uses User B API Key)"]
     end
 
     subgraph IngressLayer["Kubernetes Ingress (Traefik / NGINX)"]
-        IngressRouter["Ingress Controller\n• woo.local.test\n• dashboard.local.test"]
+        IngressRouter["Ingress Controller<br/>• woo.local.test<br/>• dashboard.local.test"]
     end
 
     subgraph PlatformPods["Team Gateway & Dashboard (Namespace: mcp-system)"]
-        DashboardUI["React Frontend Dashboard\n• Server Registry UI\n• Tool Inspector\n• API Key Manager\n• Audit Log Viewer\n• Chat Agent UI"]
-        GatewayAPI["Gateway Backend & MCP Aggregator\n• MCP Streamable HTTP Aggregator\n• Tool Prefixing (server__tool)\n• Auth & Hashed Keys (SHA-256)\n• Circuit Breaker & 5s Timeouts\n• SSRF Guard & Audit Logger"]
-        ChatAgent["Chat Agent Engine\n• LLM Tool Calling Loop\n• Runs with Authenticated User Context"]
+        DashboardUI["React Frontend Dashboard<br/>• Server Registry UI<br/>• Tool Inspector<br/>• API Key Manager<br/>• Audit Log Viewer<br/>• Chat Agent UI"]
+        GatewayAPI["Gateway Backend & MCP Aggregator<br/>• MCP Streamable HTTP Aggregator<br/>• Tool Prefixing (server__tool)<br/>• Auth & Hashed Keys (SHA-256)<br/>• Circuit Breaker & 5s Timeouts<br/>• SSRF Guard & Audit Logger"]
+        ChatAgent["Chat Agent Engine<br/>• LLM Tool Calling Loop<br/>• Runs with Authenticated User Context"]
     end
 
     subgraph InternalMCP["Internal MCP Upstreams (ClusterIP only)"]
-        WcMcp["WooCommerce MCP Server\n• list_products\n• create_product\n• list_orders\n• get_order\n• update_order_status"]
-        CurrencyMcp["Upstream #2: Currency MCP\n• convert_currency\n• get_exchange_rates\n• format_price_localized"]
-        InventoryMcp["Upstream #3: Logistics MCP\n• calculate_shipping_rates\n• track_shipment\n• estimate_delivery"]
+        WcMcp["WooCommerce MCP Server<br/>• list_products<br/>• create_product<br/>• list_orders<br/>• get_order<br/>• update_order_status"]
+        CurrencyMcp["Upstream #2: Currency MCP<br/>• convert_currency<br/>• get_exchange_rates<br/>• format_price_localized"]
+        InventoryMcp["Upstream #3: Logistics MCP<br/>• calculate_shipping_rates<br/>• track_shipment<br/>• estimate_delivery"]
     end
 
     subgraph StatefulStore["Stateful Store (Namespace: woocommerce)"]
-        WcApp["WordPress + WooCommerce\n(PHP 8.2 Apache)"]
-        MariaDB[("MariaDB 10.11\n(Persistent Storage)")]
-        WpPVC[("WordPress Content\n(Persistent Storage)")]
+        WcApp["WordPress + WooCommerce<br/>(PHP 8.2 Apache)"]
+        MariaDB[("MariaDB 10.11<br/>(Persistent Storage)")]
+        WpPVC[("WordPress Content<br/>(Persistent Storage)")]
     end
 
-    UserA -->|HTTP / Ingress| IngressRouter
-    UserB -->|HTTP / Ingress| IngressRouter
-    ExtClient -->|Streamable HTTP + Bearer Key| IngressRouter
+    UserA -->|"HTTP / Ingress"| IngressRouter
+    UserB -->|"HTTP / Ingress"| IngressRouter
+    ExtClient -->|"Streamable HTTP + Bearer Key"| IngressRouter
 
-    IngressRouter -->|dashboard.local.test| DashboardUI
-    IngressRouter -->|dashboard.local.test/api & /mcp| GatewayAPI
-    IngressRouter -->|woo.local.test| WcApp
+    IngressRouter -->|"dashboard.local.test"| DashboardUI
+    IngressRouter -->|"dashboard.local.test/api & /mcp"| GatewayAPI
+    IngressRouter -->|"woo.local.test"| WcApp
 
-    DashboardUI <-->|REST API| GatewayAPI
-    DashboardUI <-->|Chat API| ChatAgent
-    ChatAgent <-->|Internal MCP Loop| GatewayAPI
+    DashboardUI <-->|"REST API"| GatewayAPI
+    DashboardUI <-->|"Chat API"| ChatAgent
+    ChatAgent <-->|"Internal MCP Loop"| GatewayAPI
 
-    GatewayAPI -->|Streamable HTTP| WcMcp
-    GatewayAPI -->|Streamable HTTP| CurrencyMcp
-    GatewayAPI -->|Streamable HTTP| InventoryMcp
+    GatewayAPI -->|"Streamable HTTP"| WcMcp
+    GatewayAPI -->|"Streamable HTTP"| CurrencyMcp
+    GatewayAPI -->|"Streamable HTTP"| InventoryMcp
 
-    WcMcp -->|REST API (Consumer Key/Secret)| WcApp
+    WcMcp -->|"REST API - Consumer Key/Secret"| WcApp
     WcApp --> MariaDB
     WcApp --> WpPVC
 ```
