@@ -1,6 +1,7 @@
 import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import rateLimit from 'express-rate-limit';
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { SSEServerTransport } from '@modelcontextprotocol/sdk/server/sse.js';
 import {
@@ -20,6 +21,18 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
+
+// Scaling: Per-key / Per-IP Rate Limiting Middleware
+const apiLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 180,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Rate limit exceeded: Please reduce tool call frequency.' },
+});
+
+app.use('/mcp/', apiLimiter);
+app.use('/api/', apiLimiter);
 
 // Maintain active client-gateway SSE sessions
 interface GatewaySession {
@@ -69,7 +82,7 @@ function createGatewayMcpServer(user: User): Server {
   );
 
   server.setRequestHandler(ListToolsRequestSchema, async () => {
-    const aggregated = aggregator.getAggregatedTools();
+    const aggregated = aggregator.getAggregatedTools(user);
     return {
       tools: aggregated.map((t) => ({
         name: t.name,

@@ -145,11 +145,45 @@ export class McpAggregator {
     }
   }
 
-  getAggregatedTools(): AggregatedTool[] {
+const ADMIN_ONLY_TOOLS = new Set([
+  'woocommerce__create_product',
+  'woocommerce__update_order_status',
+]);
+
+export function isToolAllowedForUser(toolName: string, user?: User): boolean {
+  if (!user || user.role === 'admin') return true;
+  return !ADMIN_ONLY_TOOLS.has(toolName);
+}
+
+  getAggregatedTools(user?: User): AggregatedTool[] {
     const tools: AggregatedTool[] = [];
     for (const list of this.toolCache.values()) {
       tools.push(...list);
     }
+
+    // Built-in meta-tool: search and discover tools when many upstreams exist
+    tools.push({
+      name: 'gateway__search_tools',
+      originalName: 'search_tools',
+      serverSlug: 'gateway',
+      serverName: 'Team MCP Gateway',
+      description: '[From Gateway] Search available tools across all connected servers by keyword or intent when many tools exist.',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          query: {
+            type: 'string',
+            description: 'Keyword to search tool names and descriptions (e.g. order, currency, shipping, product)',
+          },
+        },
+        required: ['query'],
+      },
+    });
+
+    if (user && user.role !== 'admin') {
+      return tools.filter((t) => isToolAllowedForUser(t.name, user));
+    }
+
     return tools;
   }
 
@@ -160,6 +194,69 @@ export class McpAggregator {
     clientSource: 'chat_agent' | 'external_client'
   ): Promise<any> {
     const startTime = Date.now();
+
+    // 1. Check meta-tool: gateway__search_tools
+    if (namespacedToolName === 'gateway__search_tools') {
+      const q = String(args?.query || '').toLowerCase();
+      const allTools = this.getAggregatedTools(user).filter((t) => t.name !== 'gateway__search_tools');
+      const matches = allTools.filter(
+        (t) =>
+          t.name.toLowerCase().includes(q) ||
+          (t.description && t.description.toLowerCase().includes(q))
+      );
+      const durationMs = Date.now() - startTime;
+      db.addAuditLog({
+        userId: user.id,
+        username: user.username,
+        userRole: user.role,
+        serverName: 'gateway',
+        toolName: namespacedToolName,
+        params: args,
+        durationMs,
+        success: true,
+        clientSource,
+      });
+      return {
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify(
+              {
+                query: q,
+                matchedCount: matches.length,
+                tools: matches.map((m) => ({
+                  name: m.name,
+                  server: m.serverName,
+                  description: m.description,
+                })),
+              },
+              null,
+              2
+            ),
+          },
+        ],
+      };
+    }
+
+    // 2. Role-based permission enforcement (Admin vs Member)
+    if (!isToolAllowedForUser(namespacedToolName, user)) {
+      const durationMs = Date.now() - startTime;
+      const deniedMsg = `Permission denied: Tool '${namespacedToolName}' requires admin privileges.`;
+      db.addAuditLog({
+        userId: user.id,
+        username: user.username,
+        userRole: user.role,
+        serverName: 'gateway',
+        toolName: namespacedToolName,
+        params: args,
+        durationMs,
+        success: false,
+        error: deniedMsg,
+        clientSource,
+      });
+      throw new Error(deniedMsg);
+    }
+
     const route = this.toolRouting.get(namespacedToolName);
 
     if (!route) {
