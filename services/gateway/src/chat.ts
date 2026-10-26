@@ -209,18 +209,32 @@ When formatting prices, mention both the original and converted amounts if relev
         const price = priceMatch ? priceMatch[1] : '199';
 
         const startTime = Date.now();
-        const result = await aggregator.executeTool(tool.name, { name, regular_price: price, stock_quantity: 25 }, user, 'chat_agent');
-        executedTools.push({
-          tool: tool.name,
-          arguments: { name, regular_price: price, stock_quantity: 25 },
-          result,
-          durationMs: Date.now() - startTime,
-        });
+        try {
+          const result = await aggregator.executeTool(tool.name, { name, regular_price: price, stock_quantity: 25 }, user, 'chat_agent');
+          executedTools.push({
+            tool: tool.name,
+            arguments: { name, regular_price: price, stock_quantity: 25 },
+            result,
+            durationMs: Date.now() - startTime,
+          });
 
-        return {
-          response: `I've successfully created the product **${name}** priced at **$${price}** in your WooCommerce store! It is now published and live on the storefront.`,
-          toolCalls: executedTools,
-        };
+          return {
+            response: `I've successfully created the product **${name}** priced at **$${price}** in your WooCommerce store! It is now published and live on the storefront.`,
+            toolCalls: executedTools,
+          };
+        } catch (err: any) {
+          executedTools.push({
+            tool: tool.name,
+            arguments: { name, regular_price: price, stock_quantity: 25 },
+            result: null,
+            error: err.message,
+            durationMs: Date.now() - startTime,
+          });
+          return {
+            response: `⚠️ Failed to create product: ${err.message}. Please verify the WooCommerce store connection.`,
+            toolCalls: executedTools,
+          };
+        }
       }
     }
 
