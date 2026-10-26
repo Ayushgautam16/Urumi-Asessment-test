@@ -145,16 +145,6 @@ export class McpAggregator {
     }
   }
 
-const ADMIN_ONLY_TOOLS = new Set([
-  'woocommerce__create_product',
-  'woocommerce__update_order_status',
-]);
-
-export function isToolAllowedForUser(toolName: string, user?: User): boolean {
-  if (!user || user.role === 'admin') return true;
-  return !ADMIN_ONLY_TOOLS.has(toolName);
-}
-
   getAggregatedTools(user?: User): AggregatedTool[] {
     const tools: AggregatedTool[] = [];
     for (const list of this.toolCache.values()) {
