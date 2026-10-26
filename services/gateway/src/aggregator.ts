@@ -11,6 +11,16 @@ export interface AggregatedTool {
   inputSchema: any;
 }
 
+export const ADMIN_ONLY_TOOLS = new Set([
+  'woocommerce__create_product',
+  'woocommerce__update_order_status',
+]);
+
+export function isToolAllowedForUser(toolName: string, user?: User): boolean {
+  if (!user || user.role === 'admin') return true;
+  return !ADMIN_ONLY_TOOLS.has(toolName);
+}
+
 export class McpAggregator {
   private clients = new Map<string, { client: Client; transport: SSEClientTransport }>();
   private toolCache = new Map<string, AggregatedTool[]>();
