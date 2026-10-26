@@ -293,20 +293,33 @@ When formatting prices, mention both the original and converted amounts if relev
       const tool = tools.find((t) => t.name.includes('list_products'));
       if (tool) {
         const startTime = Date.now();
-        const result = await aggregator.executeTool(tool.name, {}, user, 'chat_agent');
-        executedTools.push({
-          tool: tool.name,
-          
-          arguments: {},
-          result,
-          durationMs: Date.now() - startTime,
-        });
-        const prods = JSON.parse(result.content[0].text);
-        const summary = prods.map((p: any) => `• **${p.name}** - Price: **$${p.price || p.regular_price}** (Stock: ${p.stock_quantity ?? 'In Stock'})`).join('\n');
-        return {
-          response: `Here are the current products in your catalog:\n\n${summary}`,
-          toolCalls: executedTools,
-        };
+        try {
+          const result = await aggregator.executeTool(tool.name, {}, user, 'chat_agent');
+          executedTools.push({
+            tool: tool.name,
+            arguments: {},
+            result,
+            durationMs: Date.now() - startTime,
+          });
+          const prods = JSON.parse(result.content[0].text);
+          const summary = prods.map((p: any) => `• **${p.name}** - Price: **$${p.price || p.regular_price}** (Stock: ${p.stock_quantity ?? 'In Stock'})`).join('\n');
+          return {
+            response: `Here are the current products in your catalog:\n\n${summary}`,
+            toolCalls: executedTools,
+          };
+        } catch (err: any) {
+          executedTools.push({
+            tool: tool.name,
+            arguments: {},
+            result: null,
+            error: err.message,
+            durationMs: Date.now() - startTime,
+          });
+          return {
+            response: `⚠️ Failed to fetch products: ${err.message}. Please check if the WooCommerce store is online.`,
+            toolCalls: executedTools,
+          };
+        }
       }
     }
 
@@ -317,18 +330,32 @@ When formatting prices, mention both the original and converted amounts if relev
         const amountMatch = userMessage.match(/([0-9]+(?:\.[0-9]{2})?)/);
         const amount = amountMatch ? Number(amountMatch[1]) : 199;
         const startTime = Date.now();
-        const result = await aggregator.executeTool(tool.name, { amount, from: 'USD', to: 'EUR' }, user, 'chat_agent');
-        executedTools.push({
-          tool: tool.name,
-          arguments: { amount, from: 'USD', to: 'EUR' },
-          result,
-          durationMs: Date.now() - startTime,
-        });
-        const data = JSON.parse(result.content[0].text);
-        return {
-          response: `**${amount} USD** converts to **${data.converted_amount} EUR** (Exchange rate: ${data.exchange_rate}).`,
-          toolCalls: executedTools,
-        };
+        try {
+          const result = await aggregator.executeTool(tool.name, { amount, from: 'USD', to: 'EUR' }, user, 'chat_agent');
+          executedTools.push({
+            tool: tool.name,
+            arguments: { amount, from: 'USD', to: 'EUR' },
+            result,
+            durationMs: Date.now() - startTime,
+          });
+          const data = JSON.parse(result.content[0].text);
+          return {
+            response: `**${amount} USD** converts to **${data.converted_amount} EUR** (Exchange rate: ${data.exchange_rate}).`,
+            toolCalls: executedTools,
+          };
+        } catch (err: any) {
+          executedTools.push({
+            tool: tool.name,
+            arguments: { amount, from: 'USD', to: 'EUR' },
+            result: null,
+            error: err.message,
+            durationMs: Date.now() - startTime,
+          });
+          return {
+            response: `⚠️ Failed to convert currency: ${err.message}. Please verify the Currency MCP service is reachable.`,
+            toolCalls: executedTools,
+          };
+        }
       }
     }
 
