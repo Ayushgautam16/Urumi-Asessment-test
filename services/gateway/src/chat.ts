@@ -203,9 +203,11 @@ When formatting prices, mention both the original and converted amounts if relev
     if (lower.includes('create') && lower.includes('product')) {
       const tool = tools.find((t) => t.name.includes('create_product'));
       if (tool) {
-        const nameMatch = userMessage.match(/named? ['"]?([^'"]+)['"]?/i) || userMessage.match(/product (?:called |named )?([A-Za-z0-9 ]+?)(?: priced| with|\.|$)/i);
+        const nameMatch = userMessage.match(/named?\s+['"]([^'"]+)['"]/i) || 
+                          userMessage.match(/named?\s+([A-Za-z0-9\s\-]+?)(?=\s+(?:priced|with|for|\$|\.|$))/i) ||
+                          userMessage.match(/product\s+(?:called\s+|named\s+)?([A-Za-z0-9\s\-]+?)(?=\s+(?:priced|with|for|\$|\.|$))/i);
         const priceMatch = userMessage.match(/\$?([0-9]+(?:\.[0-9]{2})?)/);
-        const name = nameMatch ? nameMatch[1].trim() : 'Studio Noise-Canceling Headphones';
+        const name = nameMatch ? nameMatch[1].trim() : 'Studio Wireless Headphones';
         const price = priceMatch ? priceMatch[1] : '199';
 
         const startTime = Date.now();
