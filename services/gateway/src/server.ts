@@ -283,10 +283,69 @@ app.delete('/api/servers/:id', async (req: Request, res: Response) => {
   res.json({ message: 'Server removed successfully' });
 });
 
-// Tools Listing
-app.get('/api/tools', (_req: Request, res: Response) => {
-  const tools = aggregator.getAggregatedTools();
+// Tools Listing (supports ?userId= for role-specific tool discovery)
+app.get('/api/tools', (req: Request, res: Response) => {
+  const userId = req.query.userId ? String(req.query.userId) : undefined;
+  const user = userId ? db.getUserById(userId) : undefined;
+  const tools = aggregator.getAggregatedTools(user);
   res.json(tools);
+});
+
+// Observability & Metrics API (Item 8)
+app.get('/api/metrics', (_req: Request, res: Response) => {
+  const logs = db.getAuditLogs({ limit: 1000 });
+  const metricsByServer: Record<
+    string,
+    { totalCalls: number; errors: number; totalDurationMs: number; errorRate: string; avgLatencyMs: number }
+  > = {};
+
+  for (const log of logs) {
+    if (!metricsByServer[log.serverName]) {
+      metricsByServer[log.serverName] = {
+        totalCalls: 0,
+        errors: 0,
+        totalDurationMs: 0,
+        errorRate: '0%',
+        avgLatencyMs: 0,
+      };
+    }
+    const m = metricsByServer[log.serverName];
+    m.totalCalls++;
+    if (!log.success) m.errors++;
+    m.totalDurationMs += log.durationMs;
+  }
+
+  for (const s in metricsByServer) {
+    const m = metricsByServer[s];
+    m.avgLatencyMs = m.totalCalls > 0 ? Math.round(m.totalDurationMs / m.totalCalls) : 0;
+    m.errorRate = m.totalCalls > 0 ? `${((m.errors / m.totalCalls) * 100).toFixed(1)}%` : '0%';
+  }
+
+  const servers = db.getServers().map((s) => ({
+    id: s.id,
+    name: s.name,
+    slug: s.slug,
+    url: s.url,
+    enabled: s.enabled,
+    status: s.status,
+    toolsCount: s.toolsCount,
+    lastCheckedAt: s.lastCheckedAt,
+    failureReason:
+      s.status === 'unreachable'
+        ? s.lastError || 'Connection refused or request timed out after 10000ms'
+        : null,
+  }));
+
+  res.json({
+    timestamp: new Date().toISOString(),
+    servers,
+    metricsByServer,
+    totalAuditRecords: logs.length,
+    rateLimiting: {
+      windowMs: 60000,
+      maxPerMinute: 180,
+    },
+  });
 });
 
 // Users
