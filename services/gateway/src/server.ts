@@ -1,6 +1,7 @@
 import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import rateLimit from 'express-rate-limit';
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { SSEServerTransport } from '@modelcontextprotocol/sdk/server/sse.js';
 import {
@@ -20,6 +21,25 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
+
+// Per-User and Per-Key Rate Limiting (Scaling & Abuse Prevention: 120 req/min)
+const apiRateLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 120,
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: (req) => {
+    const auth = req.headers['authorization'];
+    const apiKey = req.query.apiKey;
+    if (auth) return String(auth);
+    if (apiKey) return String(apiKey);
+    return req.ip || 'anonymous';
+  },
+  message: { error: 'Too many requests. Rate limit of 120 requests per minute exceeded.' },
+});
+
+app.use('/mcp/', apiRateLimiter);
+app.use('/api/', apiRateLimiter);
 
 // Maintain active client-gateway SSE sessions
 interface GatewaySession {
