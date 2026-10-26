@@ -143,11 +143,7 @@ export class McpAggregator {
         });
       }
     }
-  // Role-Based Tool Permissions: Admin-only tools
-  public static readonly ADMIN_ONLY_TOOLS = new Set<string>([
-    'woocommerce__create_product',
-    'woocommerce__update_order_status',
-  ]);
+  }
 
   getAggregatedTools(): AggregatedTool[] {
     const tools: AggregatedTool[] = [];
@@ -157,15 +153,6 @@ export class McpAggregator {
     return tools;
   }
 
-  getAggregatedToolsForUser(user?: User): AggregatedTool[] {
-    const allTools = this.getAggregatedTools();
-    if (!user || user.role === 'admin') {
-      return allTools;
-    }
-    // Members cannot see admin-only restricted tools
-    return allTools.filter((t) => !AggregatorService.ADMIN_ONLY_TOOLS.has(t.name));
-  }
-
   async executeTool(
     namespacedToolName: string,
     args: any,
@@ -173,26 +160,6 @@ export class McpAggregator {
     clientSource: 'chat_agent' | 'external_client'
   ): Promise<any> {
     const startTime = Date.now();
-
-    // Enforce Role-Based Tool Permissions (RBAC)
-    if (user.role !== 'admin' && AggregatorService.ADMIN_ONLY_TOOLS.has(namespacedToolName)) {
-      const durationMs = Date.now() - startTime;
-      const errorMsg = `Permission denied: Tool '${namespacedToolName}' requires Admin role. Current user '${user.username}' has role '${user.role}'.`;
-      db.addAuditLog({
-        userId: user.id,
-        username: user.username,
-        userRole: user.role,
-        serverName: 'woocommerce',
-        toolName: namespacedToolName,
-        params: args,
-        durationMs,
-        success: false,
-        error: errorMsg,
-        clientSource,
-      });
-      throw new Error(errorMsg);
-    }
-
     const route = this.toolRouting.get(namespacedToolName);
 
     if (!route) {
